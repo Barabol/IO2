@@ -12,6 +12,7 @@ public class RegexDefinitions {
 	public final String name = "^[A-Z][a-z]{2,24}$";
 	public final String surname = "^[A-Z][a-z]{2,29}$";
 	public final String password = "^[a-zA-Z0-9]{5,}$";
+	public final String cuponName = "^[a-zA-Z0-9]{5,15}$";
 
 	private RegexDefinitions() {
 

@@ -2,14 +2,16 @@ package org.example.endpoints;
 
 import java.util.List;
 
-import org.example.endpoints.Menu.Drink;
-import org.example.endpoints.Menu.Ingredient;
-import org.example.endpoints.Menu.Pizza;
-import org.example.endpoints.User.AccountType;
-import org.example.endpoints.User.AccountTypeRowMapper;
-import org.example.endpoints.User.UserInfo;
-import org.example.endpoints.User.UserInfoRowMapper;
+import org.example.etc.AppProperties;
 import org.example.etc.RegexDefinitions;
+import org.example.etc.DatabaseObjects.Cupon;
+import org.example.etc.DatabaseObjects.Drink;
+import org.example.etc.DatabaseObjects.Ingredient;
+import org.example.etc.DatabaseObjects.NewPizza;
+import org.example.etc.DatabaseObjects.OrderObject;
+import org.example.etc.DatabaseObjects.Pizza;
+import org.example.etc.DatabaseObjects.UserInfo;
+import org.example.etc.DatabaseObjects.UserInfoRowMapper;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -37,43 +39,7 @@ public class Admin {
 	@Autowired
 	JdbcTemplate jdbcTemplate;
 
-	public static class NewPizza {
-		public String name;
-		public int price;
-		public boolean listed;
-		public List<Integer> ingredients;
-
-		public boolean validate(JdbcTemplate db) {
-			List<Ingredient> allIngredients = Ingredient.getAllIngredients(db);
-			boolean removed = false;
-			for (Integer ingredient : ingredients) {
-				removed = false;
-				for (int x = 0; x < allIngredients.size(); x++) {
-					if (allIngredients.get(x).id == ingredient) {
-						allIngredients.remove(x);
-						removed = true;
-						break;
-					}
-					if (!removed)
-						return false;
-				}
-			}
-			return true;
-		}
-	}
-
 	// NOTE: selecty | note
-
-	@GetMapping("/all/accountTypes")
-	public @ResponseBody List<AccountType> getPermissions(HttpSession session, HttpServletResponse response) {
-		UserInfo info = UserInfo.cheackUserPermision(session, jdbcTemplate, UserInfo.AccountTypes.ADMIN);
-		if (info == null) {
-			response.setStatus(HttpStatus.UNAUTHORIZED.value());
-			return null;
-		}
-		List<AccountType> items = jdbcTemplate.query("SELECT * FROM account_types", new AccountTypeRowMapper());
-		return items;
-	}
 
 	@GetMapping("/all/users")
 	public @ResponseBody List<UserInfo> getUsers(HttpSession session, HttpServletResponse response) {
@@ -122,6 +88,28 @@ public class Admin {
 		return items;
 	}
 
+	@GetMapping("/all/cupons")
+	public @ResponseBody List<Cupon> getCupons(HttpSession session, HttpServletResponse response) {
+		UserInfo info = UserInfo.cheackUserPermision(session, jdbcTemplate, UserInfo.AccountTypes.ADMIN);
+		if (info == null) {
+			response.setStatus(HttpStatus.UNAUTHORIZED.value());
+			return null;
+		}
+		List<Cupon> items = Cupon.getAllCupons(jdbcTemplate);
+		return items;
+	}
+
+	@GetMapping("/all/orders")
+	public @ResponseBody List<OrderObject> getOrders(HttpSession session, HttpServletResponse response) {
+		UserInfo info = UserInfo.cheackUserPermision(session, jdbcTemplate, UserInfo.AccountTypes.ADMIN);
+		if (info == null) {
+			response.setStatus(HttpStatus.UNAUTHORIZED.value());
+			return null;
+		}
+		List<OrderObject> items = OrderObject.getAllPizzas(jdbcTemplate);
+		return items;
+	}
+
 	// NOTE: dodawanie | done
 
 	@PostMapping("add/newUser")
@@ -140,6 +128,27 @@ public class Admin {
 		String hash = BCrypt.hashpw(user.password, BCrypt.gensalt());
 		this.jdbcTemplate.update("INSERT INTO users(name,surname,email,password,account_type_id) VALUES (?,?,?,?,?);",
 				user.name, user.surname, user.email, hash, user.account_type);
+		return "OK";
+	}
+
+	@PostMapping("add/cupon")
+	public String addCupon(HttpSession session, HttpServletResponse response,
+			@Validated @RequestBody Cupon cupon) {
+		UserInfo info = UserInfo.cheackUserPermision(session, jdbcTemplate, UserInfo.AccountTypes.ADMIN);
+		if (info == null) {
+			response.setStatus(HttpStatus.UNAUTHORIZED.value());
+			return "unauthorized";
+		}
+		RegexDefinitions re = RegexDefinitions.getRegex();
+		if (!cupon.name.matches(re.cuponName)) {
+			response.setStatus(HttpStatus.BAD_REQUEST.value());
+			return "bad cupon name";
+		}
+		this.jdbcTemplate.update("INSERT INTO cupons(name,minimal_total,discount,discount_type_id,uses,time_of_life) " +
+				"VALUES (?,?,?,?,?,?);",
+				cupon.name.toUpperCase(), cupon.minimal_total, cupon.discount, cupon.discount_type, cupon.uses,
+				cupon.time_of_life);
+
 		return "OK";
 	}
 
@@ -285,6 +294,99 @@ public class Admin {
 		}
 		jdbcTemplate.update("UPDATE users SET account_type_id = ? WHERE id = ?;",
 				change.account_type_id, change.user_id);
+		return "OK";
+	}
+
+	@PostMapping("change/pizza/price")
+	public String changePizzaPrice(HttpSession session, HttpServletResponse response,
+			@RequestParam(required = true) Integer pizza_id, @RequestParam(required = true) Integer price) {
+		UserInfo info = UserInfo.cheackUserPermision(session, jdbcTemplate, UserInfo.AccountTypes.ADMIN);
+		if (info == null) {
+			response.setStatus(HttpStatus.UNAUTHORIZED.value());
+			return "unauthorized";
+		}
+		jdbcTemplate.update("UPDATE pizzas SET price = ? WHERE id = ?;",
+				price, pizza_id);
+		return "OK";
+	}
+
+	@PostMapping("change/drink/price")
+	public String changeDrinkPrice(HttpSession session, HttpServletResponse response,
+			@RequestParam(required = true) Integer drink_id, @RequestParam(required = true) Integer price) {
+		UserInfo info = UserInfo.cheackUserPermision(session, jdbcTemplate, UserInfo.AccountTypes.ADMIN);
+		if (info == null) {
+			response.setStatus(HttpStatus.UNAUTHORIZED.value());
+			return "unauthorized";
+		}
+		jdbcTemplate.update("UPDATE drinks SET price = ? WHERE id = ?;",
+				price, drink_id);
+		return "OK";
+	}
+
+	@PostMapping("change/ingredient/price")
+	public String changeIngredientPrice(HttpSession session, HttpServletResponse response,
+			@RequestParam(required = true) Integer ingredient_id, @RequestParam(required = true) Integer price) {
+		UserInfo info = UserInfo.cheackUserPermision(session, jdbcTemplate, UserInfo.AccountTypes.ADMIN);
+		if (info == null) {
+			response.setStatus(HttpStatus.UNAUTHORIZED.value());
+			return "unauthorized";
+		}
+		jdbcTemplate.update("UPDATE ingredients SET price = ? WHERE id = ?;",
+				price, ingredient_id);
+		return "OK";
+	}
+
+	@PostMapping("change/pizza/toggleListed")
+	public String changePizzaToggleListed(HttpSession session, HttpServletResponse response,
+			@RequestParam(required = true) Integer pizza_id) {
+		UserInfo info = UserInfo.cheackUserPermision(session, jdbcTemplate, UserInfo.AccountTypes.ADMIN);
+		if (info == null) {
+			response.setStatus(HttpStatus.UNAUTHORIZED.value());
+			return "unauthorized";
+		}
+		jdbcTemplate.update("UPDATE pizzas SET listed = NOT listed WHERE id = ?;",
+				pizza_id);
+		return "OK";
+	}
+
+	@PostMapping("change/drink/toggleListed")
+	public String changeDrinkToggleListed(HttpSession session, HttpServletResponse response,
+			@RequestParam(required = true) Integer drink_id) {
+		UserInfo info = UserInfo.cheackUserPermision(session, jdbcTemplate, UserInfo.AccountTypes.ADMIN);
+		if (info == null) {
+			response.setStatus(HttpStatus.UNAUTHORIZED.value());
+			return "unauthorized";
+		}
+		jdbcTemplate.update("UPDATE drinks SET listed = NOT listed WHERE id = ?;",
+				drink_id);
+		return "OK";
+	}
+
+	@PostMapping("change/ingredient/toggleListed")
+	public String changeIngredientToggleListed(HttpSession session, HttpServletResponse response,
+			@RequestParam(required = true) Integer ingredient_id) {
+		UserInfo info = UserInfo.cheackUserPermision(session, jdbcTemplate, UserInfo.AccountTypes.ADMIN);
+		if (info == null) {
+			response.setStatus(HttpStatus.UNAUTHORIZED.value());
+			return "unauthorized";
+		}
+		jdbcTemplate.update("UPDATE ingredients SET listed = NOT listed WHERE id = ?;",
+				ingredient_id);
+		return "OK";
+	}
+
+	// NOTE: other
+
+	@GetMapping("/reload/properties")
+	public String reloadProperties(HttpSession session, HttpServletResponse response) {
+		UserInfo info = UserInfo.cheackUserPermision(session, jdbcTemplate, UserInfo.AccountTypes.ADMIN);
+		if (info == null) {
+			response.setStatus(HttpStatus.UNAUTHORIZED.value());
+			return "unauthorized";
+		}
+		AppProperties app = AppProperties.getProperties();
+		app.reload(jdbcTemplate);
+		// TODO: dokończyć dodawanie nowego zamówienia
 		return "OK";
 	}
 }
