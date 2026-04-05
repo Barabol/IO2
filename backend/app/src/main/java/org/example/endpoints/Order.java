@@ -7,6 +7,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+
+import java.util.List;
+
+import org.example.etc.AppProperties;
+import org.example.etc.AppProperties.DictionaryField;
 
 /**
  * Order
@@ -43,5 +49,20 @@ public class Order {
 			}
 		}
 		return "OK";
+	}
+
+	@GetMapping("/deliveryMethods")
+	public List<DictionaryField> getDeliveryMethods() {
+		return AppProperties.getProperties(jdbcTemplate).deliveryMethods;
+	}
+
+	@GetMapping("/statusNames")
+	public List<DictionaryField> getStatusNames() {
+		return AppProperties.getProperties(jdbcTemplate).orderStatus;
+	}
+
+	@GetMapping("/paymentMethods")
+	public List<DictionaryField> getPaymentMethods() {
+		return AppProperties.getProperties(jdbcTemplate).paymentMethods;
 	}
 }

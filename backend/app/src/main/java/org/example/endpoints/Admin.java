@@ -384,7 +384,7 @@ public class Admin {
 			response.setStatus(HttpStatus.UNAUTHORIZED.value());
 			return "unauthorized";
 		}
-		AppProperties app = AppProperties.getProperties();
+		AppProperties app = AppProperties.getProperties(jdbcTemplate);
 		app.reload(jdbcTemplate);
 		// TODO: dokończyć dodawanie nowego zamówienia
 		return "OK";

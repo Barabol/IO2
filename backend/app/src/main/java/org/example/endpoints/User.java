@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-import org.example.etc.DatabaseObjects.AccountType;
-import org.example.etc.DatabaseObjects.AccountTypeRowMapper;
+import org.example.etc.AppProperties;
+import org.example.etc.AppProperties.DictionaryField;
 import org.example.etc.DatabaseObjects.PasswordChange;
 import org.example.etc.DatabaseObjects.UserCreation;
 import org.example.etc.DatabaseObjects.UserCredentials;
@@ -73,8 +73,7 @@ public class User {
 	}
 
 	@GetMapping("/accountTypes")
-	public @ResponseBody List<AccountType> getPermissions(HttpSession session, HttpServletResponse response) {
-		List<AccountType> items = jdbcTemplate.query("SELECT * FROM account_types", new AccountTypeRowMapper());
-		return items;
+	public @ResponseBody List<DictionaryField> getPermissions(HttpSession session, HttpServletResponse response) {
+		return AppProperties.getProperties(jdbcTemplate).accountTypes;
 	}
 }

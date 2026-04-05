@@ -155,21 +155,6 @@ public class DatabaseObjects {
 		}
 	}
 
-	public static class AccountType {
-		public String name;
-		public int id;
-	}
-
-	public static class AccountTypeRowMapper implements RowMapper<AccountType> {
-		@Override
-		public AccountType mapRow(ResultSet rs, int rowNum) throws SQLException {
-			AccountType permision = new AccountType();
-			permision.name = rs.getString("name");
-			permision.id = rs.getInt("id");
-			return permision;
-		}
-	}
-
 	public static class UserCreation {
 		public String name;
 		public String surname;
