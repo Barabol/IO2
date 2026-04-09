@@ -373,11 +373,27 @@ public class DatabaseObjects {
 		}
 	}
 
+	public static class ModdedPizzaRequest {
+		public int base;
+		public List<Integer> added;
+		public List<Integer> removed;
+	}
+
 	public static class OrderRequest {
 		public int delivery_method;
 		public int payment_method;
 		@JsonIgnoreProperties(ignoreUnknown = true)
 		public String cupon;
+		public String address;
+		// TODO: dodać listy zawierające zamówione napoje, pizze i zmodyfikowane pizze i
+		// w jaki sposób zostały one zmodyfikowane
+
+		@JsonIgnoreProperties(ignoreUnknown = true)
+		public List<Integer> drinks;
+
+		@JsonIgnoreProperties(ignoreUnknown = true)
+		public List<Integer> pizzas;
+		public List<ModdedPizzaRequest> modded;
 	}
 
 	public static class OrderObject {
@@ -389,9 +405,10 @@ public class DatabaseObjects {
 		public int status;
 		public int delivery_method;
 		public int payment_method;
+		public int address;
 		public int cupon;
 
-		public static List<OrderObject> getAllPizzas(JdbcTemplate db) {
+		public static List<OrderObject> getAllOrders(JdbcTemplate db) {
 			List<OrderObject> items = db.query("SELECT * FROM orders;",
 					new OrderObjectRowMapper());
 			return items;
@@ -413,6 +430,7 @@ public class DatabaseObjects {
 			order.delivery_method = rs.getInt("delivery_method_id");
 			order.payment_method = rs.getInt("payment_method_id");
 			order.cupon = rs.getInt("cupon_id");
+			order.address = rs.getInt("delivery_adress_id");
 			return order;
 		}
 	}

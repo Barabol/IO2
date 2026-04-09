@@ -106,7 +106,7 @@ public class Admin {
 			response.setStatus(HttpStatus.UNAUTHORIZED.value());
 			return null;
 		}
-		List<OrderObject> items = OrderObject.getAllPizzas(jdbcTemplate);
+		List<OrderObject> items = OrderObject.getAllOrders(jdbcTemplate);
 		return items;
 	}
 

@@ -2,6 +2,7 @@ package org.example.endpoints;
 
 import java.util.List;
 
+import org.example.etc.AppProperties;
 import org.example.etc.DatabaseObjects.Drink;
 import org.example.etc.DatabaseObjects.Ingredient;
 import org.example.etc.DatabaseObjects.Pizza;
@@ -20,19 +21,16 @@ public class Menu {
 
 	@GetMapping("/pizzas")
 	public @ResponseBody List<Pizza> getPizzas() {
-		List<Pizza> items = Pizza.getPizzas(jdbcTemplate);
-		return items;
+		return AppProperties.getProperties(jdbcTemplate).pizzas;
 	}
 
 	@GetMapping("/drinks")
 	public @ResponseBody List<Drink> getDrinks() {
-		List<Drink> items = Drink.getDrinks(jdbcTemplate);
-		return items;
+		return AppProperties.getProperties(jdbcTemplate).drinks;
 	}
 
 	@GetMapping("/ingredients")
 	public @ResponseBody List<Ingredient> getIngredients() {
-		List<Ingredient> items = Ingredient.getIngredients(jdbcTemplate);
-		return items;
+		return AppProperties.getProperties(jdbcTemplate).ingredients;
 	}
 }

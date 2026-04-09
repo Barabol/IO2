@@ -66,13 +66,6 @@ CREATE TABLE users(
 	account_type_id Integer REFERENCES account_types(id)
 );
 
--- kupony
-
-CREATE TABLE discount_types (
-	id SERIAL PRIMARY KEY,
-	name VARCHAR(20)
-);
-
 -- <> WARTOŚCI DISCOUNT TYPES <> --
 
 INSERT INTO discount_types(id,name) VALUES 
@@ -176,7 +169,7 @@ ON CONFLICT (id) DO NOTHING;
 
 CREATE TABLE delivery_adress (
 	id SERIAL PRIMARY KEY,
-	adress VARCHAR(20)
+	adress VARCHAR(20) UNIQUE
 );
 
 CREATE TABLE orders (
@@ -189,6 +182,7 @@ CREATE TABLE orders (
 	delivery_method_id Integer REFERENCES delivery_methods(id),
 	payment_method_id Integer REFERENCES payment_methods(id),
 	delivery_adress_id Integer REFERENCES delivery_adress(id)
+	cupon_id Integer REFERENCES cupons(id),
 );
 
 -- to --> order relations
