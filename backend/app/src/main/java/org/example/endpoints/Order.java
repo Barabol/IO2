@@ -2,7 +2,6 @@ package org.example.endpoints;
 
 import org.example.etc.DatabaseObjects.Cupon;
 import org.example.etc.DatabaseObjects.CuponRowMapper;
-import org.example.etc.DatabaseObjects.Drink;
 import org.example.etc.DatabaseObjects.OrderRequest;
 import org.example.etc.DatabaseObjects.UserInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +21,7 @@ import jakarta.servlet.http.HttpSession;
 import java.util.List;
 
 import org.example.etc.AppProperties;
+import org.example.etc.ItList;
 import org.example.etc.AppProperties.DictionaryField;
 
 /**
@@ -58,8 +58,10 @@ public class Order {
 		int total = 0;
 		AppProperties properties = AppProperties.getProperties(jdbcTemplate);
 
-		for (int x = 0; x < order.drinks.size(); x++) {
-			Integer holder = properties.getDrinkPrice(order.drinks.get(x));
+		ItList<Integer> drinks = new ItList<Integer>(order.drinks);
+
+		for (Integer x : drinks) {
+			Integer holder = properties.getDrinkPrice(x);
 			if (holder == null) {
 				response.setStatus(HttpStatus.BAD_REQUEST.value());
 				return "Bad drink id";
@@ -67,8 +69,10 @@ public class Order {
 			total += holder;
 		}
 
-		for (int x = 0; x < order.pizzas.size(); x++) {
-			Integer holder = properties.getPizzaPrice(order.pizzas.get(x));
+		ItList<Integer> pizzas = new ItList<Integer>(order.pizzas);
+
+		for (int x : pizzas) {
+			Integer holder = properties.getPizzaPrice(x);
 			if (holder == null) {
 				response.setStatus(HttpStatus.BAD_REQUEST.value());
 				return "Bad pizza id";
@@ -99,13 +103,13 @@ public class Order {
 				info.id, total, order.delivery_method, order.payment_method, adress_id,
 				cupon == null ? null : cupon.id);
 
-		for (int x = 0; x < order.drinks.size(); x++) {
+		for (int x : drinks) {
 			jdbcTemplate.update("INSERT INTO ordered_drink(order_id,drink_id) VALUES (?, ?);",
-					order_id, order.drinks.get(x));
+					order_id, x);
 		}
-		for (int x = 0; x < order.pizzas.size(); x++) {
+		for (int x : pizzas) {
 			jdbcTemplate.update("INSERT INTO ordered_pizza(order_id,pizza_id) VALUES (?, ?);",
-					order_id, order.pizzas.get(x));
+					order_id, x);
 		}
 		if (cupon != null)
 			jdbcTemplate.update("UPDATE cupons SET uses = uses - 1 WHERE id = ?;", cupon.id);
