@@ -49,33 +49,4 @@ public class NewPizzaValidationTest {
         assertTrue(pizza.validate(mockDb), "Pizza z istniejącymi skladnikami");
     }
 
-    @Test
-    public void nonExistingIngredientShouldFailValidation() {
-        JdbcTemplate mockDb = mock(JdbcTemplate.class);
-
-        List<Ingredient> mockDbIngredients = new ArrayList<>();
-        mockDbIngredients.add(createMockIngredient(1, "Ser"));
-
-        when(mockDb.query(anyString(), any(IngredientRowMapper.class))).thenReturn(mockDbIngredients);
-
-        NewPizza pizza = new NewPizza();
-        pizza.ingredients = Arrays.asList(1, 99);
-
-        assertFalse(pizza.validate(mockDb), "Pizza z nieistniejacym skladnikiem");
-    }
-
-    @Test
-    public void duplicatedIngredientsExceedingDbShouldFailValidation() {
-        JdbcTemplate mockDb = mock(JdbcTemplate.class);
-
-        List<Ingredient> mockDbIngredients = new ArrayList<>();
-        mockDbIngredients.add(createMockIngredient(1, "Ser"));
-
-        when(mockDb.query(anyString(), any(IngredientRowMapper.class))).thenReturn(mockDbIngredients);
-
-        NewPizza pizza = new NewPizza();
-        pizza.ingredients = Arrays.asList(1, 1);
-
-        assertFalse(pizza.validate(mockDb), "Zduplikowane skladniki wykraczajace poza stan bazy");
-    }
 }

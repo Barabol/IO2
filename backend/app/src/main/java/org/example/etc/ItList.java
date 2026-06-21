@@ -25,4 +25,6 @@ public class ItList<T> implements Iterable<T> {
 		return this.list.get(index);
 	}
 
+	public void sort() {
+	}
 }

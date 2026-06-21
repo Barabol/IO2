@@ -2,8 +2,10 @@ package org.example.endpoints;
 
 import org.example.etc.DatabaseObjects.Cupon;
 import org.example.etc.DatabaseObjects.CuponRowMapper;
+import org.example.etc.DatabaseObjects.ModdedPizzaRequest;
 import org.example.etc.DatabaseObjects.OrderRequest;
 import org.example.etc.DatabaseObjects.UserInfo;
+import org.example.etc.DatabaseObjects.Ingredient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
@@ -79,6 +81,49 @@ public class Order {
 			}
 			total += holder;
 		}
+		ItList<ModdedPizzaRequest> modded = new ItList<>(order.modded);
+		for (ModdedPizzaRequest x : modded) {
+			Integer holder = properties.getPizzaPrice(x.base);
+			if (holder == null) {
+				response.setStatus(HttpStatus.BAD_REQUEST.value());
+				return "Bad base pizza id";
+			}
+			ItList<Integer> ig = new ItList<Integer>(x.removed);
+			Integer totalHolder = 0;
+			Integer iholder;
+			for (int y : ig) {
+				iholder = properties.getIngredientPrice(y);
+				if (iholder == null) {
+					response.setStatus(HttpStatus.BAD_REQUEST.value());
+					return "Bad base pizza id";
+				}
+				ItList<Ingredient> h = new ItList<>(properties.getPizza(x.base).ingredients);
+				boolean got = false;
+				for (Ingredient i : h) {
+					if (i.id == y) {
+						got = true;
+						break;
+					}
+				}
+				if (!got) {
+					response.setStatus(HttpStatus.BAD_REQUEST.value());
+					return "bad removed item from pizza";
+				}
+				totalHolder -= iholder;
+			}
+			ig = new ItList<Integer>(x.added);
+			for (int y : ig) {
+				iholder = properties.getIngredientPrice(y);
+				if (iholder == null) {
+					response.setStatus(HttpStatus.BAD_REQUEST.value());
+					return "Bad base pizza id";
+				}
+				totalHolder += iholder;
+			}
+			holder += totalHolder;
+			total += holder;
+		}
+
 		// TODO: dodać wsparcie na modyfikowane pizz'e
 
 		if (cupon != null) {
@@ -110,6 +155,8 @@ public class Order {
 		for (int x : pizzas) {
 			jdbcTemplate.update("INSERT INTO ordered_pizza(order_id,pizza_id) VALUES (?, ?);",
 					order_id, x);
+		}
+		for (ModdedPizzaRequest x : modded) {
 		}
 		if (cupon != null)
 			jdbcTemplate.update("UPDATE cupons SET uses = uses - 1 WHERE id = ?;", cupon.id);

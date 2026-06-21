@@ -88,6 +88,53 @@ public class DatabaseObjects {
 		public int account_type;
 		public String password;
 
+		public static Builder builder() {
+			return new Builder();
+		}
+
+		public static class Builder {
+			private final UserInfo userInfo = new UserInfo();
+
+			public Builder id(Integer id) {
+				userInfo.id = id;
+				return this;
+			}
+
+			public Builder name(String name) {
+				userInfo.name = name;
+				return this;
+			}
+
+			public Builder surname(String surname) {
+				userInfo.surname = surname;
+				return this;
+			}
+
+			public Builder email(String email) {
+				userInfo.email = email;
+				return this;
+			}
+
+			public Builder accountType(int accountType) {
+				userInfo.account_type = accountType;
+				return this;
+			}
+
+			public Builder accountType(AccountTypes accountType) {
+				userInfo.account_type = accountType.value();
+				return this;
+			}
+
+			public Builder password(String password) {
+				userInfo.password = password;
+				return this;
+			}
+
+			public UserInfo build() {
+				return userInfo;
+			}
+		}
+
 		public static enum AccountTypes {
 			USER(0),
 			COOKER(1),
@@ -188,12 +235,13 @@ public class DatabaseObjects {
 				response.setStatus(HttpStatus.BAD_REQUEST.value());
 				return "unable to add new user due to e-mail being used by other accoiunt";
 			}
-			UserInfo info = new UserInfo();
-			info.id = id;
-			info.password = hash;
-			info.email = this.email;
-			info.name = this.name;
-			info.surname = this.surname;
+			UserInfo info = UserInfo.builder()
+					.id(id)
+					.password(hash)
+					.email(this.email)
+					.name(this.name)
+					.surname(this.surname)
+					.build();
 			session.setAttribute("userId", info.id);
 			return "OK";
 		}

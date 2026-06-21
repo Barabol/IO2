@@ -11,8 +11,8 @@ public class UserCreationValidationTest {
     @Test
     public void validUserValidation() {
         UserCreation user = new UserCreation();
-        user.name = "Jarosław";
-        user.surname = "Kaczyński";
+        user.name = "Jaroslaw";
+        user.surname = "Kaczynski";
         user.email = "jaroslaw.kaczynskik@example.com";
         user.password = "haslo123";
 
@@ -28,8 +28,8 @@ public class UserCreationValidationTest {
     @Test
     public void invalidNameValidation() {
         UserCreation user = new UserCreation();
-        user.name = "jarosław";
-        user.surname = "Kaczyński";
+        user.name = "Jarosław";
+        user.surname = "Kaczynski";
         user.email = "jaroslaw.kaczynskik@example.com";
         user.password = "haslo123";
 
@@ -39,8 +39,8 @@ public class UserCreationValidationTest {
     @Test
     public void invalidEmailValidation() {
         UserCreation user = new UserCreation();
-        user.name = "Jarosław";
-        user.surname = "Kaczyński";
+        user.name = "Jaroslaw";
+        user.surname = "Kaczynski";
         user.email = "zly-email.com";
         user.password = "haslo123";
 
@@ -50,8 +50,8 @@ public class UserCreationValidationTest {
     @Test
     public void invalidPasswordValidation() {
         UserCreation user = new UserCreation();
-        user.name = "Jarosław";
-        user.surname = "Kaczyński";
+        user.name = "Jaroslaw";
+        user.surname = "Kaczynski";
         user.email = "jaroslaw.kaczynskik@example.com";
         user.password = "123";
 

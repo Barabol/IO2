@@ -43,6 +43,7 @@ public class AppProperties {
 	public List<DictionaryField> paymentMethods = null;
 
 	public List<Pizza> pizzas = null;
+	public List<Pizza> unlistedPizzas = null;
 	public List<Drink> drinks = null;
 	public List<Ingredient> ingredients = null;
 
@@ -75,6 +76,18 @@ public class AppProperties {
 		return null;
 	}
 
+	public Integer getIngredientPrice(int index) {
+		for (int x = 0; x < this.ingredients.size(); x++) {
+			if (this.ingredients.get(x).id == index) {
+				int val = 0;
+				return this.ingredients.get(x).price + val;
+			}
+			if (this.ingredients.get(x).id > index)
+				return null;
+		}
+		return null;
+	}
+
 	public Pizza getPizza(int index) {
 		for (int x = 0; x < this.pizzas.size(); x++) {
 			if (this.pizzas.get(x).id == index)
@@ -101,6 +114,7 @@ public class AppProperties {
 		this.deliveryMethods = db.query("SELECT * FROM delivery_methods  ORDER BY id ASC", new DictRowMapper());
 		this.drinks = db.query("SELECT * FROM drinks WHERE listed ORDER BY id ASC", new DrinkRowMapper());
 		this.pizzas = db.query("SELECT * FROM pizzas WHERE listed ORDER BY id ASC", new PizzaRowMapper(db));
+		this.unlistedPizzas = db.query("SELECT * FROM pizzas WHERE NOT listed ORDER BY id ASC", new PizzaRowMapper(db));
 		this.ingredients = db.query("SELECT * FROM ingredients WHERE listed ORDER BY id ASC", new IngredientRowMapper());
 	}
 }
